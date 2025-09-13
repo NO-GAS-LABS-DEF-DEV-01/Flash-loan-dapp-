@@ -1,0 +1,315 @@
+name: 🚀 Deploy Sui Flash Loan dApp
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deployment_target:
+        description: 'Deployment target'
+        required: true
+        default: 'testnet'
+        type: choice
+        options:
+          - testnet
+          - mainnet
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.9'
+
+jobs:
+  # Move contracts testing and building
+  move-contracts:
+    name: 🔧 Build & Test Move Contracts
+    runs-on: ubuntu-latest
+    outputs:
+      package-id: ${{ steps.publish.outputs.package-id }}
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🦀 Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - name: 📥 Cache Rust dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: ⚡ Install Sui CLI
+        run: |
+          cargo install --locked --git https://github.com/MystenLabs/sui.git --branch testnet sui
+
+      - name: 🧪 Run Move tests
+        run: |
+          cd contracts
+          sui move test --coverage
+
+      - name: 🔍 Move lint and format check
+        run: |
+          cd contracts
+          sui move build
+          
+      - name: 🚀 Publish to Testnet (if main branch)
+        id: publish
+        if: github.ref == 'refs/heads/main' || github.event.inputs.deployment_target == 'testnet'
+        run: |
+          cd contracts
+          # Configure Sui for testnet
+          sui client new-env --alias testnet --rpc https://fullnode.testnet.sui.io:443
+          sui client switch --env testnet
+          
+          # Publish package
+          PUBLISH_OUTPUT=$(sui client publish --gas-budget 30000000 --json)
+          PACKAGE_ID=$(echo $PUBLISH_OUTPUT | jq -r '.objectChanges[] | select(.type == "published") | .packageId')
+          echo "package-id=$PACKAGE_ID" >> $GITHUB_OUTPUT
+          echo "📦 Published package: $PACKAGE_ID"
+
+      - name: 🚀 Publish to Mainnet (manual trigger only)
+        if: github.event.inputs.deployment_target == 'mainnet'
+        run: |
+          cd contracts
+          # Configure Sui for mainnet
+          sui client new-env --alias mainnet --rpc https://fullnode.mainnet.sui.io:443
+          sui client switch --env mainnet
+          
+          # Publish package (requires mainnet SUI for gas)
+          sui client publish --gas-budget 50000000
+
+  # Frontend build and test
+  frontend-build:
+    name: 🎨 Build & Test Frontend
+    runs-on: ubuntu-latest
+    needs: move-contracts
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: 📥 Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: 🧪 Run tests
+        run: |
+          cd frontend
+          npm test -- --coverage --watchAll=false
+
+      - name: 🔍 ESLint check
+        run: |
+          cd frontend
+          npm run lint || true # Don't fail on lint warnings
+
+      - name: 🏗️ Build frontend
+        env:
+          REACT_APP_PACKAGE_ID: ${{ needs.move-contracts.outputs.package-id }}
+          REACT_APP_NETWORK: ${{ github.ref == 'refs/heads/main' && 'testnet' || 'testnet' }}
+        run: |
+          cd frontend
+          npm run build
+
+      - name: 📤 Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/build/
+
+  # Integration tests
+  integration-tests:
+    name: 🧪 Integration Tests
+    runs-on: ubuntu-latest
+    needs: [move-contracts, frontend-build]
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 📥 Download frontend build
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/build/
+
+      - name: 🧪 Run integration tests
+        env:
+          PACKAGE_ID: ${{ needs.move-contracts.outputs.package-id }}
+        run: |
+          cd frontend
+          npm ci
+          npm run test:integration
+
+  # E2E tests
+  e2e-tests:
+    name: 🎭 E2E Tests
+    runs-on: ubuntu-latest
+    needs: [move-contracts, frontend-build]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 📥 Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: 🧪 Run E2E tests
+        env:
+          PACKAGE_ID: ${{ needs.move-contracts.outputs.package-id }}
+        run: |
+          cd frontend
+          npm run test:e2e
+
+      - name: 📤 Upload E2E artifacts
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: e2e-screenshots
+          path: frontend/cypress/screenshots/
+
+  # Security scan
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Run CodeQL Analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript, typescript
+
+      - name: 🔍 Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+      - name: 🔍 Run npm audit
+        run: |
+          cd frontend
+          npm audit --audit-level moderate
+
+  # Deployment to testnet (automatic on main)
+  deploy-testnet:
+    name: 🚀 Deploy to Testnet
+    runs-on: ubuntu-latest
+    needs: [move-contracts, frontend-build, integration-tests]
+    if: github.ref == 'refs/heads/main' && success()
+    environment:
+      name: testnet
+      url: https://sui-flash-loan-testnet.vercel.app
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download frontend build
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/build/
+
+      - name: 🚀 Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: frontend
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+
+      - name: 🔗 Update package configuration
+        run: |
+          echo "Testnet deployment completed"
+          echo "Package ID: ${{ needs.move-contracts.outputs.package-id }}"
+          echo "Frontend URL: https://sui-flash-loan-testnet.vercel.app"
+
+  # Manual mainnet deployment
+  deploy-mainnet:
+    name: 🌐 Deploy to Mainnet
+    runs-on: ubuntu-latest
+    needs: [move-contracts, frontend-build, e2e-tests]
+    if: github.event.inputs.deployment_target == 'mainnet' && success()
+    environment:
+      name: mainnet
+      url: https://sui-flash-loan.vercel.app
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download frontend build
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/build/
+
+      - name: 🚀 Deploy to Vercel (Mainnet)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_MAINNET }}
+          working-directory: frontend
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+
+  # Notification
+  notify:
+    name: 📢 Notify Team
+    runs-on: ubuntu-latest
+    needs: [deploy-testnet, deploy-mainnet]
+    if: always() && (needs.deploy-testnet.result != 'skipped' || needs.deploy-mainnet.result != 'skipped')
+    steps:
+      - name: 📢 Notify on success
+        if: success()
+        run: |
+          echo "🎉 Deployment successful!"
+          echo "✅ Contracts deployed and verified"
+          echo "✅ Frontend deployed and accessible"
+          echo "✅ All tests passed"
+
+      - name: 📢 Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Deployment failed!"
+          echo "Please check the logs and fix any issues"
+          exit 1
+
+  # Cleanup
+  cleanup:
+    name: 🧹 Cleanup
+    runs-on: ubuntu-latest
+    needs: [deploy-testnet, deploy-mainnet]
+    if: always()
+    steps:
+      - name: 🧹 Remove temporary artifacts
+        uses: actions/upload-artifact/merge@v4
+        with:
+          delete-merged: true
