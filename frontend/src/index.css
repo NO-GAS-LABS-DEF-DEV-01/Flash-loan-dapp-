@@ -1,0 +1,202 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import pixel-perfect fonts */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+/* Global styles for NO_GAS-LABS theme */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(135deg, #0a0a0a 0%, #050505 100%);
+    color: #00ffff;
+    overflow-x: hidden;
+  }
+
+  /* Matrix rain background effect */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.05) 0%, transparent 50%),
+      linear-gradient(45deg, rgba(0, 255, 255, 0.02) 0%, rgba(255, 0, 255, 0.02) 100%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0a0a0a;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, #00ffff, #ff00ff);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, #00cccc, #cc00cc);
+  }
+}
+
+@layer components {
+  /* Button components */
+  .btn-neon {
+    @apply px-6 py-3 bg-transparent border-2 border-ngl-teal text-ngl-teal font-pixel text-sm uppercase tracking-wider transition-all duration-300 hover:bg-ngl-teal hover:text-ngl-dark hover:shadow-neon-teal;
+  }
+
+  .btn-neon-magenta {
+    @apply px-6 py-3 bg-transparent border-2 border-ngl-magenta text-ngl-magenta font-pixel text-sm uppercase tracking-wider transition-all duration-300 hover:bg-ngl-magenta hover:text-ngl-dark hover:shadow-neon-magenta;
+  }
+
+  .btn-neon-gold {
+    @apply px-6 py-3 bg-transparent border-2 border-ngl-gold text-ngl-gold font-pixel text-sm uppercase tracking-wider transition-all duration-300 hover:bg-ngl-gold hover:text-ngl-dark hover:shadow-neon-gold;
+  }
+
+  /* Card components */
+  .card-neon {
+    @apply bg-ngl-dark/50 backdrop-blur-sm border border-ngl-teal/30 rounded-lg p-6 shadow-lg hover:border-ngl-teal/60 transition-all duration-300;
+  }
+
+  .card-draggable {
+    @apply card-neon cursor-move hover:shadow-neon-teal transform hover:scale-105 transition-transform duration-200;
+  }
+
+  /* Text effects */
+  .text-neon {
+    @apply text-ngl-teal animate-glow;
+  }
+
+  .text-pixel {
+    @apply font-pixel text-sm tracking-wider;
+  }
+
+  .text-cyber {
+    @apply font-cyber text-xl font-bold tracking-wide;
+  }
+
+  /* Input components */
+  .input-neon {
+    @apply bg-ngl-dark border border-ngl-teal/50 text-ngl-teal placeholder-ngl-gray-light px-4 py-2 rounded font-pixel text-sm focus:outline-none focus:border-ngl-teal focus:shadow-neon-teal transition-all duration-300;
+  }
+
+  /* Loading animations */
+  .loading-dots::after {
+    content: '';
+    animation: loading-dots 1.5s steps(4, end) infinite;
+  }
+
+  @keyframes loading-dots {
+    0%, 20% { content: ''; }
+    40% { content: '.'; }
+    60% { content: '..'; }
+    80%, 100% { content: '...'; }
+  }
+
+  /* Grid layout for drag-and-drop */
+  .grid-container {
+    @apply grid gap-4 p-4;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  /* Opportunity card styling */
+  .opportunity-card {
+    @apply card-neon relative overflow-hidden;
+  }
+
+  .opportunity-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+    transition: left 0.8s;
+  }
+
+  .opportunity-card:hover::before {
+    left: 100%;
+  }
+
+  /* Status indicators */
+  .status-active {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-pixel bg-ngl-green/20 text-ngl-green border border-ngl-green/50;
+  }
+
+  .status-inactive {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-pixel bg-ngl-red/20 text-ngl-red border border-ngl-red/50;
+  }
+
+  .status-pending {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-pixel bg-ngl-gold/20 text-ngl-gold border border-ngl-gold/50;
+  }
+
+  /* Chart styling */
+  .chart-container {
+    @apply bg-ngl-dark/30 border border-ngl-teal/20 rounded-lg p-4;
+  }
+
+  /* Modal styling */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center;
+  }
+
+  .modal-content {
+    @apply bg-ngl-dark border border-ngl-teal rounded-lg p-6 max-w-md w-full mx-4 shadow-neon-teal;
+  }
+}
+
+@layer utilities {
+  /* Animation utilities */
+  .animate-flicker {
+    animation: flicker 1.5s linear infinite;
+  }
+
+  .animate-pulse-neon {
+    animation: pulse-neon 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Text shadow utilities */
+  .text-shadow-neon {
+    text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(45deg, #00ffff, #ff00ff, #ffaa00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Hover effects */
+  .hover-lift {
+    @apply transform transition-transform duration-200 hover:-translate-y-1;
+  }
+
+  /* Glass morphism effect */
+  .glass {
+    @apply bg-white/5 backdrop-blur-md border border-white/10;
+  }
+}
