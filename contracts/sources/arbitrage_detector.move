@@ -208,7 +208,7 @@ module sui_flash_loan::arbitrage_detector {
             event::emit(OpportunityDetected {
                 detector: tx_context::sender(ctx),
                 pool_a: @0x1, // Sui chain
-                pool_b: @0x16e3714ddbecf1c56dc03281549d621b3517d2b5949a69f1d3f0617d67a1762b, // Use package ID as reference
+                pool_b: @0xf44e96ad7aa2155c7bf68b7debf5ea9e63445b9342bc4138c219f330742c1bc7, // Use package ID as reference
                 token_pair: string::utf8(b"SUI/USD"),
                 price_difference: price_diff,
                 potential_profit: relative_diff,
@@ -238,8 +238,8 @@ module sui_flash_loan::arbitrage_detector {
 
             event::emit(OpportunityDetected {
                 detector: tx_context::sender(ctx),
-                pool_a: @0x16e3714ddbecf1c56dc03281549d621b3517d2b5949a69f1d3f0617d67a1762b,
-                pool_b: @0x16e3714ddbecf1c56dc03281549d621b3517d2b5949a69f1d3f0617d67a1762b,
+                pool_a: @0xf44e96ad7aa2155c7bf68b7debf5ea9e63445b9342bc4138c219f330742c1bc7,
+                pool_b: @0xf44e96ad7aa2155c7bf68b7debf5ea9e63445b9342bc4138c219f330742c1bc7,
                 token_pair: string::utf8(b"COLLATERAL/DEBT"),
                 price_difference: debt_value - collateral_value,
                 potential_profit: profit_potential,

@@ -91,7 +91,7 @@ module sui_flash_loan::deepbook_integration {
         register_pool(
             manager,
             string::utf8(b"testnet_sui_usdc"),
-            @0x16e3714ddbecf1c56dc03281549d621b3517d2b5949a69f1d3f0617d67a1762b, // Reference package ID
+            @0xf44e96ad7aa2155c7bf68b7debf5ea9e63445b9342bc4138c219f330742c1bc7, // Reference package ID
             string::utf8(b"SUI"),
             string::utf8(b"USDC"),
             ctx
@@ -100,7 +100,7 @@ module sui_flash_loan::deepbook_integration {
         register_pool(
             manager,
             string::utf8(b"testnet_sui_usdt"),
-            @0x16e3714ddbecf1c56dc03281549d621b3517d2b5949a69f1d3f0617d67a1762b, // Reference package ID
+            @0xf44e96ad7aa2155c7bf68b7debf5ea9e63445b9342bc4138c219f330742c1bc7, // Reference package ID
             string::utf8(b"SUI"),
             string::utf8(b"USDT"),
             ctx
@@ -118,7 +118,7 @@ module sui_flash_loan::deepbook_integration {
         register_pool(
             manager,
             string::utf8(b"mainnet_sui_usdc"),
-            @0x16e3714ddbecf1c56dc03281549d621b3517d2b5949a69f1d3f0617d67a1762b, // Reference package ID
+            @0xf44e96ad7aa2155c7bf68b7debf5ea9e63445b9342bc4138c219f330742c1bc7, // Reference package ID
             string::utf8(b"SUI"),
             string::utf8(b"USDC"),
             ctx
@@ -127,7 +127,7 @@ module sui_flash_loan::deepbook_integration {
         register_pool(
             manager,
             string::utf8(b"mainnet_sui_usdt"),
-            @0x16e3714ddbecf1c56dc03281549d621b3517d2b5949a69f1d3f0617d67a1762b, // Reference package ID
+            @0xf44e96ad7aa2155c7bf68b7debf5ea9e63445b9342bc4138c219f330742c1bc7, // Reference package ID
             string::utf8(b"SUI"),
             string::utf8(b"USDT"),
             ctx

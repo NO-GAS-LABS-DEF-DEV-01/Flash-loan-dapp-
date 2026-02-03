@@ -1,5 +1,5 @@
 [package]
-name = "SuiFlashLoanDApp"
+name = "SuiFlashLoanDAppV2"
 version = "1.0.0"
 edition = "2024.beta"
 
@@ -8,11 +8,11 @@ Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-fram
 DeepBook = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/deepbook", rev = "framework/testnet" }
 
 [addresses]
-sui_flash_loan = "0x16e3714ddbecf1c56dc03281549d621b3517d2b5949a69f1d3f0617d67a1762b"
+sui_flash_loan = "0x0"
 deepbook = "0xdee9"
 
 [dev-dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
 
 [dev-addresses]
-sui_flash_loan = "0x16e3714ddbecf1c56dc03281549d621b3517d2b5949a69f1d3f0617d67a1762b"
+sui_flash_loan = "0x0"

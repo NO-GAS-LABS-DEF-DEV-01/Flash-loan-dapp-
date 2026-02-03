@@ -30,12 +30,12 @@ const FlashLoanWidget: React.FC = () => {
   // Available pools based on network
   const availablePools = {
     testnet: [
-      { id: '0x16e3714ddbecf1c56dc03281549d621b3517d2b5949a69f1d3f0617d67a1762b', name: 'SUI/USDC Pool', pair: 'SUI/USDC' },
-      { id: '0x16e3714ddbecf1c56dc03281549d621b3517d2b5949a69f1d3f0617d67a1762b', name: 'SUI/USDT Pool', pair: 'SUI/USDT' },
+      { id: '0xf44e96ad7aa2155c7bf68b7debf5ea9e63445b9342bc4138c219f330742c1bc7', name: 'SUI/USDC Pool', pair: 'SUI/USDC' },
+      { id: '0xf44e96ad7aa2155c7bf68b7debf5ea9e63445b9342bc4138c219f330742c1bc7', name: 'SUI/USDT Pool', pair: 'SUI/USDT' },
     ],
     mainnet: [
-      { id: '0x16e3714ddbecf1c56dc03281549d621b3517d2b5949a69f1d3f0617d67a1762b', name: 'SUI/USDC Pool', pair: 'SUI/USDC' },
-      { id: '0x16e3714ddbecf1c56dc03281549d621b3517d2b5949a69f1d3f0617d67a1762b', name: 'SUI/USDT Pool', pair: 'SUI/USDT' },
+      { id: '0xf44e96ad7aa2155c7bf68b7debf5ea9e63445b9342bc4138c219f330742c1bc7', name: 'SUI/USDC Pool', pair: 'SUI/USDC' },
+      { id: '0xf44e96ad7aa2155c7bf68b7debf5ea9e63445b9342bc4138c219f330742c1bc7', name: 'SUI/USDT Pool', pair: 'SUI/USDT' },
     ]
   };
 
